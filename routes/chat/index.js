@@ -73,7 +73,6 @@ router.post('/dispatcher/one', function(req, res, next) {
 
 async function bypassToAgent (conversationId, metadata) {
     console.log('bypass to agent - passing conversation id : ', conversationId);
-    console.log('bypass to agent - passing metadata : ', metadata);
     const passControlApi = new SunshineConversationsClient.SwitchboardActionsApi();
     let passControlBody = new SunshineConversationsClient.PassControlBody();
     passControlBody = {
