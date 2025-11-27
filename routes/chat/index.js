@@ -6,6 +6,8 @@ const suncoAppId = process.env.SUNCO_APP_ID;
 const ultimateSwIntegrationId = process.env.SUNCO_ULTIMATE_SW_ID;
 const ultimateWhitelistChannel = process.env.SUNCO_ULTIMATE_WHITELIST_ID;
 const zdMarketplaceFieldId = process.env.ZD_MARKETPLACE_FIELD_ID || '44657252529561';
+const zdConversationFieldId = process.env.ZD_CONVERSATION_FIELD_ID || '51990290290585';
+const zdAffiliateFieldId = process.env.ZD_AFFILIATE_FIELD_ID || '52815713394073';
 
 router.post('/dispatcher/zero', async function(req, res, next) {
     if (!req.body.events) {
