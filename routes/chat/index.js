@@ -1,7 +1,7 @@
 var express = require('express');
 var SunshineConversationsClient = require('sunshine-conversations-client');
-// var defaultClient = SunshineConversationsClient.ApiClient.instance;
 var router = express.Router();
+
 const suncoAppId = process.env.SUNCO_APP_ID;
 const ultimateSwIntegrationId = process.env.SUNCO_ULTIMATE_SW_ID;
 const ultimateWhitelistChannel = process.env.SUNCO_ULTIMATE_WHITELIST_ID;
@@ -68,7 +68,7 @@ router.post('/dispatcher/zero', async function(req, res, next) {
 });
 
 router.post('/dispatcher/one', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+    res.status(200).send({ dispatch_one: 'Message passed and message posted'});
 });
 
 async function bypassToAgent (conversationId, metadata) {
