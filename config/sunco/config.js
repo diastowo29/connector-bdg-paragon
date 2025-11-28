@@ -1,9 +1,12 @@
 let SunshineConversationsClient = require('sunshine-conversations-client');
+const { getDecryptedString } = require('../encrypt/config');
+const suncoConfigEncrypted = process.env.SUNCO;
+const suncoConfigDecrypted = JSON.parse(getDecryptedString(suncoConfigEncrypted));
 
 let defaultClient = SunshineConversationsClient.ApiClient.instance;
 let basicAuth = defaultClient.authentications['basicAuth'];
-basicAuth.username = process.env.SUNCO_KEY_ID;
-basicAuth.password = process.env.SUNCO_KEY_SECRET;
+basicAuth.username = suncoConfigDecrypted.key_id;
+basicAuth.password = suncoConfigDecrypted.secret;
 
 module.exports = {
     defaultClient
