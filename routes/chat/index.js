@@ -146,7 +146,7 @@ router.post('/dispatcher/one', async function(req, res, next) {
                     switchboardIntegration: 'zd-agentWorkspace',
                     metadata: conversationMetadata
                 }
-                console.log(passControlBody)
+                // console.log(passControlBody)
                 await passControlApi.passControl(suncoAppId, inboundConversationId, passControlBody);
                 res.status(200).send({ dispatch_one: 'Message passed and message posted'});
             } else {
