@@ -132,7 +132,7 @@ router.post('/dispatcher/one', async function(req, res, next) {
     const conversationMetadata = convPayload.metadata;
     try {
         if (convPayload.activeSwitchboardIntegration.name == 'Dispatcher-One') {
-            let affiliateTags = 'test';
+            let affiliateTags = '';
             if (conversationMetadata) {
                 if (conversationMetadata[zdAffiliateFieldId] == 1) {
                     affiliateTags = 'affiliate'
