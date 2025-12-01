@@ -17,7 +17,7 @@ const zdAffiliateFieldId = zdFieldsDecrypted.affiliate;
 router.get('/config', function(req, res, next) {
     const fieldsList = JSON.parse(getDecryptedString(zdFieldsEncrypted));
     res.status(200).send({ticket_fields: fieldsList, sunco: suncoConfigDecrypted})
-})
+});
 
 router.post('/dispatcher/zero', async function(req, res, next) {
     if (!req.body.events) {
@@ -106,7 +106,7 @@ router.post('/dispatcher/zero', async function(req, res, next) {
         }
     } catch (error) {
         console.log('exception conversation : ', inboundConversationId)
-        console.log(req.body)
+        console.log(req.body);
         console.log(error);
         await bypassToAgent(inboundConversationId, conversationMetadata);
         if (error.status && error.body) {
@@ -132,6 +132,7 @@ router.post('/dispatcher/one', async function(req, res, next) {
     const conversationMetadata = convPayload.metadata;
     try {
         if (convPayload.activeSwitchboardIntegration.name == 'Dispatcher-One') {
+            console.log('dispatcher/one - passing conversation id : ', inboundConversationId);
             let affiliateTags = '';
             if (conversationMetadata) {
                 if (conversationMetadata[zdAffiliateFieldId] == 1) {
@@ -160,7 +161,7 @@ router.post('/dispatcher/one', async function(req, res, next) {
         }
     } catch (error) {
         console.log('exception conversation : ', inboundConversationId)
-        console.log(req.body)
+        console.log(req.body);
         console.log(error);
         await bypassToAgent(inboundConversationId, conversationMetadata);
         if (error.status && error.body) {
