@@ -66,7 +66,7 @@ router.post('/dispatcher/zero', async function(req, res, next) {
             conversationMetadata['dataCapture.systemField.tags'] = `${initiateTags}`;
             conversationMetadata[zdConversationFieldId] = inboundConversationId;
             conversationMetadata[zdAffiliateFieldId] = affiliateTags;
-            if (conversationMetadata[zdMarketplaceFieldId] == ultimateWhitelistChannel) {
+            if (ultimateWhitelistChannel.includes(conversationMetadata[zdMarketplaceFieldId])) {
                 if (isInitiate) {
                     // console.log(conversationMetadata);
                     await bypassToAgent(inboundConversationId, conversationMetadata);
