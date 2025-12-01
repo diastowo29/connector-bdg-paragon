@@ -66,12 +66,9 @@ router.post('/dispatcher/zero', async function(req, res, next) {
             conversationMetadata['dataCapture.systemField.tags'] = `${initiateTags}`;
             conversationMetadata[zdConversationFieldId] = inboundConversationId;
             conversationMetadata[zdAffiliateFieldId] = affiliateTags;
-            // console.log(JSON.stringify(req.body))
-            // console.log(conversationMetadata[zdMarketplaceFieldId]);
-            // console.log(ultimateWhitelistChannel);
             if (conversationMetadata[zdMarketplaceFieldId] == ultimateWhitelistChannel) {
                 if (isInitiate) {
-                    console.log(conversationMetadata);
+                    // console.log(conversationMetadata);
                     await bypassToAgent(inboundConversationId, conversationMetadata);
                     res.status(200).send({ dispatch_zero: 'Message passed and message posted'});
                 } else {
@@ -92,7 +89,7 @@ router.post('/dispatcher/zero', async function(req, res, next) {
                         },
                         content: inboundConversationContent
                     }
-                    console.log('dispatcher zero - passing conversation id : ', inboundConversationId);
+                    console.log('dispatcher/zero - passing conversation id : ', inboundConversationId);
                     await passControlApi.passControl(suncoAppId, inboundConversationId, passControlBody);
                     await postMessageApi.postMessage(suncoAppId, inboundConversationId, postMessageBody);
                     res.status(200).send({ dispatch_zero: 'Message passed and message posted'});
@@ -113,7 +110,7 @@ router.post('/dispatcher/zero', async function(req, res, next) {
         console.log(error);
         await bypassToAgent(inboundConversationId, conversationMetadata);
         if (error.status && error.body) {
-            console.log(error.status);
+            // console.log(error.status);
             if (error.body.errors) {
                 console.log(error.body.errors);
                 return res.status(error.status).send({error: error.body.errors});
@@ -141,7 +138,7 @@ router.post('/dispatcher/one', async function(req, res, next) {
                     affiliateTags = 'affiliate'
                 }
                 conversationMetadata[zdConversationFieldId] = inboundConversationId;
-                conversationMetadata['dataCapture.ticketField.52841857960473'] = affiliateTags;
+                conversationMetadata[zdAffiliateFieldId] = affiliateTags;
                 // conversationMetadata[zdAffiliateFieldId] = affiliateTags;
                 const passControlApi = new SunshineConversationsClient.SwitchboardActionsApi();
                 let passControlBody = new SunshineConversationsClient.PassControlBody();
@@ -167,7 +164,7 @@ router.post('/dispatcher/one', async function(req, res, next) {
         console.log(error);
         await bypassToAgent(inboundConversationId, conversationMetadata);
         if (error.status && error.body) {
-            console.log(error.status);
+            // console.log(error.status);
             if (error.body.errors) {
                 console.log(error.body.errors);
                 return res.status(error.status).send({error: error.body.errors});
