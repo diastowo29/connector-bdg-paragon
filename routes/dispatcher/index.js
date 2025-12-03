@@ -10,21 +10,6 @@ const ultimateSwIntegrationId = process.env.SUNCO_ULTIMATE_SW_ID;
 const ultimateWhitelistChannel = process.env.SUNCO_ULTIMATE_WHITELIST_ID;
 const zdFieldsDecrypted = JSON.parse(getDecryptedString(zdFieldsEncrypted));
 const suncoConfigDecrypted = JSON.parse(getDecryptedString(suncoConfigEncrypted));
-const suncoAppId = suncoConfigDecrypted.app_id;
-const zdMarketplaceFieldId = zdFieldsDecrypted.store;
-const zdConversationFieldId = zdFieldsDecrypted.conversation_id;
-const zdAffiliateFieldId = zdFieldsDecrypted.affiliate;
-
-router.get('/logging', function(req, res, next) {
-    let logs = {
-        process: '/dispatcher/zero'
-    }
-    logger.info(logs);
-    logger.warn(logs);
-    logger.error(logs);
-    logger.trace(logs);
-    res.status(200).send({});
-})
 
 router.get('/config', function(req, res, next) {
     const fieldsList = JSON.parse(getDecryptedString(zdFieldsEncrypted));
@@ -67,7 +52,7 @@ router.post('/zero', async function(req, res, next) {
         let initiateTags = 'non_initiate';
         let isInitiate = false;
         if (conversationMetadata) {
-            if (conversationMetadata[zdAffiliateFieldId] == 1) {
+            if (conversationMetadata[zdFieldsDecrypted.affiliate] == 1) {
                 affiliateTags = 'affiliate'
             }
             if (messagePayload.metadata) {
@@ -81,14 +66,14 @@ router.post('/zero', async function(req, res, next) {
             // conversationBody = {
             //     metadata: {
             //         // 'dataCapture.systemField.tags': affiliateTags,
-            //         [zdConversationFieldId]: inboundConversationId
+            //         [zdFieldsDecrypted.conversation_id]: inboundConversationId
             //     }
             // }
             // await conversationApi.updateConversation(suncoAppId, inboundConversationId, conversationBody);
             conversationMetadata['dataCapture.systemField.tags'] = `${initiateTags}`;
-            conversationMetadata[zdConversationFieldId] = inboundConversationId;
-            conversationMetadata[zdAffiliateFieldId] = affiliateTags;
-            if (ultimateWhitelistChannel.includes(conversationMetadata[zdMarketplaceFieldId])) {
+            conversationMetadata[zdFieldsDecrypted.conversation_id] = inboundConversationId;
+            conversationMetadata[zdFieldsDecrypted.affiliate] = affiliateTags;
+            if (ultimateWhitelistChannel.includes(conversationMetadata[zdFieldsDecrypted.store])) {
                 if (isInitiate) {
                     // console.info(conversationMetadata);
                     await bypassToAgent(inboundConversationId, conversationMetadata);
@@ -112,8 +97,8 @@ router.post('/zero', async function(req, res, next) {
                         content: inboundConversationContent
                     }
                     console.info('dispatcher/zero - passing conversation id : ', inboundConversationId);
-                    await passControlApi.passControl(suncoAppId, inboundConversationId, passControlBody);
-                    await postMessageApi.postMessage(suncoAppId, inboundConversationId, postMessageBody);
+                    await passControlApi.passControl(suncoConfigDecrypted.app_id, inboundConversationId, passControlBody);
+                    await postMessageApi.postMessage(suncoConfigDecrypted.app_id, inboundConversationId, postMessageBody);
                     res.status(200).send({ dispatch_zero: 'Message passed and message posted'});
                 }
             } else {
@@ -164,12 +149,12 @@ router.post('/one', async function(req, res, next) {
             if (conversationMetadata) {
                 logs['action'] = 'pass';
                 logger.info(logs);
-                if (conversationMetadata[zdAffiliateFieldId] == 1) {
+                if (conversationMetadata[zdFieldsDecrypted.affiliate] == 1) {
                     affiliateTags = 'affiliate'
                 }
-                conversationMetadata[zdConversationFieldId] = inboundConversationId;
-                conversationMetadata[zdAffiliateFieldId] = affiliateTags;
-                // conversationMetadata[zdAffiliateFieldId] = affiliateTags;
+                conversationMetadata[zdFieldsDecrypted.conversation_id] = inboundConversationId;
+                conversationMetadata[zdFieldsDecrypted.affiliate] = affiliateTags;
+                // conversationMetadata[zdFieldsDecrypted.affiliate] = affiliateTags;
                 const passControlApi = new SunshineConversationsClient.SwitchboardActionsApi();
                 let passControlBody = new SunshineConversationsClient.PassControlBody();
                 passControlBody = {
@@ -177,7 +162,7 @@ router.post('/one', async function(req, res, next) {
                     metadata: conversationMetadata
                 }
                 // console.info(passControlBody)
-                await passControlApi.passControl(suncoAppId, inboundConversationId, passControlBody);
+                await passControlApi.passControl(suncoConfigDecrypted.app_id, inboundConversationId, passControlBody);
                 res.status(200).send({ dispatch_one: 'Message passed and message posted'});
             } else {
                 logs['action'] = 'bypass';
@@ -224,7 +209,7 @@ async function bypassToAgent (conversationId, metadata) {
         switchboardIntegration: 'zd-agentWorkspace',
         metadata: metadata
     }
-    await passControlApi.passControl(suncoAppId, conversationId, passControlBody);
+    await passControlApi.passControl(suncoConfigDecrypted.app_id, conversationId, passControlBody);
 }
 
 module.exports = router;
