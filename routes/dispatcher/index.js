@@ -42,7 +42,7 @@ router.post('/zero', async function(req, res, next) {
     const conversationMetadata = convPayload.metadata;
     try {
         logs['conversation_id'] = inboundConversationId;
-        logger(logs);
+        // logger(logs);
         console.info('dispatcher zero - passing conversation id : ', inboundConversationId);
         if (inboundSource != 'api:conversations') {
             console.info('non api:conversations - bypass to agent');
