@@ -156,7 +156,7 @@ router.post('/dispatcher/one', async function(req, res, next) {
                 res.status(200).send({ dispatch_one: 'Message passed and message posted'});
             }
         } else {
-            console.info('ignore -- switchboard integration active on: ', convPayload.activeSwitchboardIntegration.name);
+            console.info(`ignore -- switchboard integration ${inboundConversationId} active on: ${convPayload.activeSwitchboardIntegration.name}`);
             res.status(200).send({ dispatch_one: 'Message passed and message posted'});
         }
     } catch (error) {
