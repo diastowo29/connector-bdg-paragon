@@ -51,6 +51,7 @@ router.post('/zero', async function(req, res, next) {
     const conversationMetadata = convPayload.metadata;
     try {
         logs['conversation_id'] = inboundConversationId;
+        logs['message'] = `passing conversation ${inboundConversationId}`
         // console.info('dispatcher zero - passing conversation id : ', inboundConversationId);
         if (inboundSource != 'api:conversations') {
             logs['action'] = 'bypass to agent';
@@ -127,20 +128,22 @@ router.post('/zero', async function(req, res, next) {
         }
     } catch (error) {
         console.warn('exception conversation : ', inboundConversationId)
-        console.warn(req.body);
-        console.error(error);
+        logs['body'] = req.body;
         await bypassToAgent(inboundConversationId, conversationMetadata);
         if (error.status && error.body) {
-            // console.info(error.status);
             if (error.body.errors) {
-                console.error(error.body.errors);
+                logs['message'] = error.body.errors;
+                logger.error(logs);
                 return res.status(error.status).send({error: error.body.errors});
             } else {
-                console.error(error.body);
+                logs['message'] = error.body;
+                logger.error(logs);
                 return res.status(error.status).send({error: error.body});
             }
             // if (error.status >= 500 && error.status < 600) {}
         } else {
+            logs['message'] = error;
+            logger.error(logs);
             return res.status(500).send({error: error});
         }
     }
@@ -154,8 +157,8 @@ router.post('/one', async function(req, res, next) {
     const convPayload = eventPayload.payload.conversation;
     const inboundConversationId = convPayload.id;
     const conversationMetadata = convPayload.metadata;
+    logs['conversation_id'] = inboundConversationId;
     try {
-        logs['conversation_id'] = inboundConversationId;
         if (convPayload.activeSwitchboardIntegration.name == 'Dispatcher-One') {
             logs['action'] = 'pass';
             logger.info(logs);
@@ -188,21 +191,22 @@ router.post('/one', async function(req, res, next) {
             res.status(200).send({ dispatch_one: 'Message passed and message posted'});
         }
     } catch (error) {
-        console.info('exception conversation : ', inboundConversationId)
-        console.info(req.body);
-        console.error(error);
+        console.warn('exception conversation : ', inboundConversationId)
+        logs['body'] = req.body;
         await bypassToAgent(inboundConversationId, conversationMetadata);
         if (error.status && error.body) {
-            // console.info(error.status);
             if (error.body.errors) {
-                console.info(error.body.errors);
+                logs['message'] = error.body.errors;
+                logger.error(logs);
                 return res.status(error.status).send({error: error.body.errors});
             } else {
-                console.info(error.body);
+                logs['message'] = error.body;
+                logger.error(logs);
                 return res.status(error.status).send({error: error.body});
             }
-            // if (error.status >= 500 && error.status < 600) {}
         } else {
+            logs['message'] = error;
+            logger.error(logs);
             return res.status(500).send({error: error});
         }
     }
