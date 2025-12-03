@@ -21,7 +21,7 @@ router.get('/config', function(req, res, next) {
 
 router.post('/dispatcher/zero', async function(req, res, next) {
     if (!req.body.events) {
-        console.log(req.body);
+        console.warn(req.body);
         return res.status(400).send({ error: 'No events in request body' });
     }
     const eventPayload = req.body.events[0];
@@ -35,9 +35,9 @@ router.post('/dispatcher/zero', async function(req, res, next) {
     // const eventsId = eventPayload.id;
     const conversationMetadata = convPayload.metadata;
     try {
-        console.log('dispatcher zero - passing conversation id : ', inboundConversationId);
+        console.info('dispatcher zero - passing conversation id : ', inboundConversationId);
         if (inboundSource != 'api:conversations') {
-            console.log('non api:conversations - bypass to agent');
+            console.info('non api:conversations - bypass to agent');
             await bypassToAgent(inboundConversationId, conversationMetadata);
             return res.status(200).send({ dispatch_zero: 'bypassed to agent'});
         }
@@ -68,18 +68,18 @@ router.post('/dispatcher/zero', async function(req, res, next) {
             conversationMetadata[zdAffiliateFieldId] = affiliateTags;
             if (ultimateWhitelistChannel.includes(conversationMetadata[zdMarketplaceFieldId])) {
                 if (isInitiate) {
-                    // console.log(conversationMetadata);
+                    // console.info(conversationMetadata);
                     await bypassToAgent(inboundConversationId, conversationMetadata);
                     res.status(200).send({ dispatch_zero: 'Message passed and message posted'});
                 } else {
-                    // console.log(conversationMetadata);
+                    // console.info(conversationMetadata);
                     const passControlApi = new SunshineConversationsClient.SwitchboardActionsApi();
                     let passControlBody = new SunshineConversationsClient.PassControlBody();
                     passControlBody = {
                         switchboardIntegration: ultimateSwIntegrationId,
                         metadata: conversationMetadata
                     }
-                    // console.log(passControlBody);
+                    // console.info(passControlBody);
                     const postMessageApi = new SunshineConversationsClient.MessagesApi();
                     let postMessageBody = new SunshineConversationsClient.MessagePost();
                     postMessageBody = {
@@ -89,33 +89,33 @@ router.post('/dispatcher/zero', async function(req, res, next) {
                         },
                         content: inboundConversationContent
                     }
-                    console.log('dispatcher/zero - passing conversation id : ', inboundConversationId);
+                    console.info('dispatcher/zero - passing conversation id : ', inboundConversationId);
                     await passControlApi.passControl(suncoAppId, inboundConversationId, passControlBody);
                     await postMessageApi.postMessage(suncoAppId, inboundConversationId, postMessageBody);
                     res.status(200).send({ dispatch_zero: 'Message passed and message posted'});
                 }
             } else {
-                console.log('Other inbound conversation id ---- bypass to agent')
+                console.info('Other inbound conversation id ---- bypass to agent')
                 await bypassToAgent(inboundConversationId, conversationMetadata);
                 res.status(200).send({ dispatch_zero: 'bypassed to agent'});
             }
         } else {
-            console.log('no metadata ---- bypass to agent')
+            console.info('no metadata ---- bypass to agent')
             await bypassToAgent(inboundConversationId, conversationMetadata);
             res.status(200).send({ dispatch_zero: 'bypassed to agent'});
         }
     } catch (error) {
-        console.log('exception conversation : ', inboundConversationId)
-        console.log(req.body);
-        console.log(error);
+        console.warn('exception conversation : ', inboundConversationId)
+        console.warn(req.body);
+        console.error(error);
         await bypassToAgent(inboundConversationId, conversationMetadata);
         if (error.status && error.body) {
-            // console.log(error.status);
+            // console.info(error.status);
             if (error.body.errors) {
-                console.log(error.body.errors);
+                console.error(error.body.errors);
                 return res.status(error.status).send({error: error.body.errors});
             } else {
-                console.log(error.body);
+                console.error(error.body);
                 return res.status(error.status).send({error: error.body});
             }
             // if (error.status >= 500 && error.status < 600) {}
@@ -132,7 +132,7 @@ router.post('/dispatcher/one', async function(req, res, next) {
     const conversationMetadata = convPayload.metadata;
     try {
         if (convPayload.activeSwitchboardIntegration.name == 'Dispatcher-One') {
-            console.log('dispatcher/one - passing conversation id : ', inboundConversationId);
+            console.info('dispatcher/one - passing conversation id : ', inboundConversationId);
             let affiliateTags = '';
             if (conversationMetadata) {
                 if (conversationMetadata[zdAffiliateFieldId] == 1) {
@@ -147,30 +147,30 @@ router.post('/dispatcher/one', async function(req, res, next) {
                     switchboardIntegration: 'zd-agentWorkspace',
                     metadata: conversationMetadata
                 }
-                // console.log(passControlBody)
+                // console.info(passControlBody)
                 await passControlApi.passControl(suncoAppId, inboundConversationId, passControlBody);
                 res.status(200).send({ dispatch_one: 'Message passed and message posted'});
             } else {
-                console.log('no metadata ---- bypass to agent')
+                console.info('no metadata ---- bypass to agent')
                 await bypassToAgent(inboundConversationId, conversationMetadata);
                 res.status(200).send({ dispatch_one: 'Message passed and message posted'});
             }
         } else {
-            console.log('ignore -- switchboard integration active on: ', convPayload.activeSwitchboardIntegration.name);
+            console.info('ignore -- switchboard integration active on: ', convPayload.activeSwitchboardIntegration.name);
             res.status(200).send({ dispatch_one: 'Message passed and message posted'});
         }
     } catch (error) {
-        console.log('exception conversation : ', inboundConversationId)
-        console.log(req.body);
-        console.log(error);
+        console.info('exception conversation : ', inboundConversationId)
+        console.info(req.body);
+        console.error(error);
         await bypassToAgent(inboundConversationId, conversationMetadata);
         if (error.status && error.body) {
-            // console.log(error.status);
+            // console.info(error.status);
             if (error.body.errors) {
-                console.log(error.body.errors);
+                console.info(error.body.errors);
                 return res.status(error.status).send({error: error.body.errors});
             } else {
-                console.log(error.body);
+                console.info(error.body);
                 return res.status(error.status).send({error: error.body});
             }
             // if (error.status >= 500 && error.status < 600) {}
@@ -182,7 +182,7 @@ router.post('/dispatcher/one', async function(req, res, next) {
 });
 
 async function bypassToAgent (conversationId, metadata) {
-    console.log('bypass to agent - passing conversation id : ', conversationId);
+    console.info('bypass to agent - passing conversation id : ', conversationId);
     const passControlApi = new SunshineConversationsClient.SwitchboardActionsApi();
     let passControlBody = new SunshineConversationsClient.PassControlBody();
     passControlBody = {
