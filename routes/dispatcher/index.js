@@ -2,9 +2,7 @@ var express = require('express');
 var SunshineConversationsClient = require('sunshine-conversations-client');
 const { getDecryptedString } = require('../../config/encrypt/config');
 var router = express.Router();
-const logger = require('pino-http')({
-    useLevel: 'info'
-})
+const logger = require('pino')()
 
 const suncoConfigEncrypted = process.env.SUNCO;
 const zdFieldsEncrypted = process.env.ZD_TICKET_FIELDS;
@@ -16,6 +14,17 @@ const suncoAppId = suncoConfigDecrypted.app_id;
 const zdMarketplaceFieldId = zdFieldsDecrypted.store;
 const zdConversationFieldId = zdFieldsDecrypted.conversation_id;
 const zdAffiliateFieldId = zdFieldsDecrypted.affiliate;
+
+router.get('/logging', function(req, res, next) {
+    let logs = {
+        process: '/dispatcher/zero'
+    }
+    logger.info(logs);
+    logger.warn(logs);
+    logger.error(logs);
+    logger.trace(logs);
+    res.status(200).send({});
+})
 
 router.get('/config', function(req, res, next) {
     const fieldsList = JSON.parse(getDecryptedString(zdFieldsEncrypted));
@@ -42,13 +51,17 @@ router.post('/zero', async function(req, res, next) {
     const conversationMetadata = convPayload.metadata;
     try {
         logs['conversation_id'] = inboundConversationId;
-        // logger(logs);
-        console.info('dispatcher zero - passing conversation id : ', inboundConversationId);
+        // console.info('dispatcher zero - passing conversation id : ', inboundConversationId);
         if (inboundSource != 'api:conversations') {
-            console.info('non api:conversations - bypass to agent');
+            logs['action'] = 'bypass to agent';
+            logs['reason'] = 'non api:conversations';
+            logger.info(logs);
+            // console.info('non api:conversations - bypass to agent');
             await bypassToAgent(inboundConversationId, conversationMetadata);
             return res.status(200).send({ dispatch_zero: 'bypassed to agent'});
         }
+        logs['action'] = 'pass';
+        logger.info(logs);
         let affiliateTags = 'non_affiliate';
         let initiateTags = 'non_initiate';
         let isInitiate = false;
@@ -142,9 +155,10 @@ router.post('/one', async function(req, res, next) {
     const inboundConversationId = convPayload.id;
     const conversationMetadata = convPayload.metadata;
     try {
+        logs['conversation_id'] = inboundConversationId;
         if (convPayload.activeSwitchboardIntegration.name == 'Dispatcher-One') {
-            logs['conversation_id'] = inboundConversationId;
-            console.info('dispatcher/one - passing conversation id : ', inboundConversationId);
+            logs['action'] = 'pass';
+            logger.info(logs);
             let affiliateTags = '';
             if (conversationMetadata) {
                 if (conversationMetadata[zdAffiliateFieldId] == 1) {
@@ -168,6 +182,8 @@ router.post('/one', async function(req, res, next) {
                 res.status(200).send({ dispatch_one: 'Message passed and message posted'});
             }
         } else {
+            logs['action'] = 'ignore';
+            logger.info(logs);
             console.info(`ignore -- switchboard integration ${inboundConversationId} active on: ${convPayload.activeSwitchboardIntegration.name}`);
             res.status(200).send({ dispatch_one: 'Message passed and message posted'});
         }
