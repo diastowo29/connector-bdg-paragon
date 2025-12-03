@@ -8,7 +8,8 @@ require('./config/sunco/config').defaultClient;
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var chatsRouter = require('./routes/chat/index');
+var dispatcherRouter = require('./routes/dispatcher/index');
+var chatRouter = require('./routes/chat/index');
 
 var app = express();
 
@@ -24,7 +25,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/chats', chatsRouter);
+app.use('/chats', chatRouter);
+app.use('/dispatcher', dispatcherRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

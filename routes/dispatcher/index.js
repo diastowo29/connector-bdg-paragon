@@ -2,8 +2,9 @@ var express = require('express');
 var SunshineConversationsClient = require('sunshine-conversations-client');
 const { getDecryptedString } = require('../../config/encrypt/config');
 var router = express.Router();
-
-/* OLD FILES.. NOT USED ANYMORE */
+const logger = require('pino-http')({
+    useLevel: 'info'
+})
 
 const suncoConfigEncrypted = process.env.SUNCO;
 const zdFieldsEncrypted = process.env.ZD_TICKET_FIELDS;
@@ -21,10 +22,13 @@ router.get('/config', function(req, res, next) {
     res.status(200).send({ticket_fields: fieldsList, sunco: suncoConfigDecrypted})
 });
 
-router.post('/dispatcher/zero', async function(req, res, next) {
+router.post('/zero', async function(req, res, next) {
     if (!req.body.events) {
         console.warn(req.body);
         return res.status(400).send({ error: 'No events in request body' });
+    }
+    let logs = {
+        process: '/dispatcher/zero'
     }
     const eventPayload = req.body.events[0];
     const convPayload = eventPayload.payload.conversation;
@@ -37,6 +41,8 @@ router.post('/dispatcher/zero', async function(req, res, next) {
     // const eventsId = eventPayload.id;
     const conversationMetadata = convPayload.metadata;
     try {
+        logs['conversation_id'] = inboundConversationId;
+        logger(logs);
         console.info('dispatcher zero - passing conversation id : ', inboundConversationId);
         if (inboundSource != 'api:conversations') {
             console.info('non api:conversations - bypass to agent');
@@ -127,13 +133,17 @@ router.post('/dispatcher/zero', async function(req, res, next) {
     }
 });
 
-router.post('/dispatcher/one', async function(req, res, next) {
+router.post('/one', async function(req, res, next) {
+    let logs = {
+        process: '/dispatcher/one'
+    }
     const eventPayload = req.body.events[0];
     const convPayload = eventPayload.payload.conversation;
     const inboundConversationId = convPayload.id;
     const conversationMetadata = convPayload.metadata;
     try {
         if (convPayload.activeSwitchboardIntegration.name == 'Dispatcher-One') {
+            logs['conversation_id'] = inboundConversationId;
             console.info('dispatcher/one - passing conversation id : ', inboundConversationId);
             let affiliateTags = '';
             if (conversationMetadata) {
