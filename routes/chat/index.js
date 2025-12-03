@@ -1,11 +1,11 @@
 var express = require('express');
-var SunshineConversationsClient = require('sunshine-conversations-client');
-const { getDecryptedString } = require('../../config/encrypt/config');
+/* var SunshineConversationsClient = require('sunshine-conversations-client');
+const { getDecryptedString } = require('../../config/encrypt/config'); */
 var router = express.Router();
 
 /* OLD FILES.. NOT USED ANYMORE */
 
-const suncoConfigEncrypted = process.env.SUNCO;
+/* const suncoConfigEncrypted = process.env.SUNCO;
 const zdFieldsEncrypted = process.env.ZD_TICKET_FIELDS;
 const ultimateSwIntegrationId = process.env.SUNCO_ULTIMATE_SW_ID;
 const ultimateWhitelistChannel = process.env.SUNCO_ULTIMATE_WHITELIST_ID;
@@ -14,14 +14,14 @@ const suncoConfigDecrypted = JSON.parse(getDecryptedString(suncoConfigEncrypted)
 const suncoAppId = suncoConfigDecrypted.app_id;
 const zdMarketplaceFieldId = zdFieldsDecrypted.store;
 const zdConversationFieldId = zdFieldsDecrypted.conversation_id;
-const zdAffiliateFieldId = zdFieldsDecrypted.affiliate;
+const zdAffiliateFieldId = zdFieldsDecrypted.affiliate; */
 
-router.get('/config', function(req, res, next) {
+/* router.get('/config', function(req, res, next) {
     const fieldsList = JSON.parse(getDecryptedString(zdFieldsEncrypted));
     res.status(200).send({ticket_fields: fieldsList, sunco: suncoConfigDecrypted})
-});
+}); */
 
-router.post('/dispatcher/zero', async function(req, res, next) {
+/* router.post('/dispatcher/zero', async function(req, res, next) {
     if (!req.body.events) {
         console.warn(req.body);
         return res.status(400).send({ error: 'No events in request body' });
@@ -125,9 +125,9 @@ router.post('/dispatcher/zero', async function(req, res, next) {
             return res.status(500).send({error: error});
         }
     }
-});
+}); */
 
-router.post('/dispatcher/one', async function(req, res, next) {
+/* router.post('/dispatcher/one', async function(req, res, next) {
     const eventPayload = req.body.events[0];
     const convPayload = eventPayload.payload.conversation;
     const inboundConversationId = convPayload.id;
@@ -181,9 +181,9 @@ router.post('/dispatcher/one', async function(req, res, next) {
         }
     }
     // conversationMetadata['dataCapture.systemField.tags'] = `${initiateTags}`;
-});
+}); */
 
-async function bypassToAgent (conversationId, metadata) {
+/* async function bypassToAgent (conversationId, metadata) {
     console.info('bypass to agent - passing conversation id : ', conversationId);
     const passControlApi = new SunshineConversationsClient.SwitchboardActionsApi();
     let passControlBody = new SunshineConversationsClient.PassControlBody();
@@ -192,6 +192,6 @@ async function bypassToAgent (conversationId, metadata) {
         metadata: metadata
     }
     await passControlApi.passControl(suncoAppId, conversationId, passControlBody);
-}
+} */
 
 module.exports = router;

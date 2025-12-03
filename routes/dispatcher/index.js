@@ -160,10 +160,10 @@ router.post('/one', async function(req, res, next) {
     logs['conversation_id'] = inboundConversationId;
     try {
         if (convPayload.activeSwitchboardIntegration.name == 'Dispatcher-One') {
-            logs['action'] = 'pass';
-            logger.info(logs);
             let affiliateTags = '';
             if (conversationMetadata) {
+                logs['action'] = 'pass';
+                logger.info(logs);
                 if (conversationMetadata[zdAffiliateFieldId] == 1) {
                     affiliateTags = 'affiliate'
                 }
@@ -180,14 +180,17 @@ router.post('/one', async function(req, res, next) {
                 await passControlApi.passControl(suncoAppId, inboundConversationId, passControlBody);
                 res.status(200).send({ dispatch_one: 'Message passed and message posted'});
             } else {
+                logs['action'] = 'bypass';
+                logs['reason'] = 'no metadata';
+                logger.info(logs);
                 console.info('no metadata ---- bypass to agent')
                 await bypassToAgent(inboundConversationId, conversationMetadata);
                 res.status(200).send({ dispatch_one: 'Message passed and message posted'});
             }
         } else {
             logs['action'] = 'ignore';
+            logs['message'] = `ignore conversation ${inboundConversationId}`;
             logger.info(logs);
-            console.info(`ignore -- switchboard integration ${inboundConversationId} active on: ${convPayload.activeSwitchboardIntegration.name}`);
             res.status(200).send({ dispatch_one: 'Message passed and message posted'});
         }
     } catch (error) {
