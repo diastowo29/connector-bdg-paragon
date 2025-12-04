@@ -10,6 +10,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var dispatcherRouter = require('./routes/dispatcher/index');
 var chatRouter = require('./routes/chat/index');
+var zdRouter = require('./routes/zendesk/index');
 
 var app = express();
 
@@ -27,6 +28,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/chats', chatRouter);
 app.use('/dispatcher', dispatcherRouter);
+app.use('/zd', zdRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

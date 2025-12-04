@@ -174,7 +174,7 @@ router.post('/one', async function(req, res, next) {
             }
         } else {
             logs['action'] = 'ignore';
-            logs['message'] = `ignore conversation ${inboundConversationId}`;
+            logs['message'] = `ignore conversation ${inboundConversationId} -- switchboard: ${convPayload.activeSwitchboardIntegration.name}`;
             logger.info(logs);
             res.status(200).send({ dispatch_one: 'Message passed and message posted'});
         }
