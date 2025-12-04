@@ -39,76 +39,76 @@ router.post('/zd/reply', async function(req, res, next) {
     let messageContent = {};
 
     switch(inboundConversationContent.type) {
-        case 'text':
-            if (inboundConversationContent.text.includes('type: product')) {
-              let messageText = inboundConversationContent.text.trim()
-              let productId = (messageText.split('\n')[1]).split(' ')[1]
-              messageContent = {
-                message: messageText,
-                mp_product_id: productId,
-                type: 'product'
+      case 'text':
+          if (inboundConversationContent.text.includes('type: product')) {
+            let messageText = inboundConversationContent.text.trim()
+            let productId = (messageText.split('\n')[1]).split(' ')[1]
+            messageContent = {
+              message: messageText,
+              mp_product_id: productId,
+              type: 'product'
+            }
+          } else {
+            messageContent = {
+              message: inboundConversationContent.text,
+              type: 'text'
+            }
+          }
+          break;
+      case 'image':
+          let imageName = inboundConversationContent.altText
+          let imageType = inboundConversationContent.mediaType
+
+          if (payload.conversation.metadata[zdFieldsDecrypted.marketplace_name] == 'shopee') {
+            let formData = await downloadImageToBuffer(inboundConversationContent.mediaUrl, imageName, imageType, 0)
+            if (formData) {
+              let uploadImage = await uploadImageToBantudagang(formData, payload.conversation.metadata[zdFieldsDecrypted.store_id])
+              if(uploadImage.message == 'SUCCESS'){
+                isValidSourceType = true
+                messageContent = {
+                  image_url: uploadImage.data,
+                  type: 'image'
+                }
               }
             } else {
-              messageContent = {
-                message: inboundConversationContent.text,
-                type: 'text'
-              }
+              errorMessage = "Cannot sent image to user due to technical issue"
             }
-            break;
-        case 'image':
-            let imageName = inboundConversationContent.altText
-            let imageType = inboundConversationContent.mediaType
+          } else {
+            isValidSourceType = true
+            messageContent = {
+              image_url: inboundConversationContent.mediaUrl,
+              type: 'text'
+            }
+          }
+          break;
+      case 'file':
+          let fileType = inboundConversationContent.mediaType
+          if (fileType.includes('video')) {
+            if(payload.conversation.metadata[zdFieldsDecrypted.marketplace_name] == 'shopee'){
+                /* let formData = await downloadImageToBuffer(payload.message.content.mediaUrl, imageName, fileType, 0)
 
-            if (payload.conversation.metadata[zdFieldsDecrypted.marketplace_name] == 'shopee') {
-              let formData = await downloadImageToBuffer(inboundConversationContent.mediaUrl, imageName, imageType, 0)
-              if (formData) {
-                let uploadImage = await uploadImageToBantudagang(formData, payload.conversation.metadata[zdFieldsDecrypted.store_id])
-                if(uploadImage.message == 'SUCCESS'){
-                  isValidSourceType = true
-                  messageContent = {
-                    image_url: uploadImage.data,
-                    type: 'image'
+                if(formData){
+                  let uploadImage = await uploadImageToBantudagang(formData, payload.conversation.metadata["dataCapture.ticketField.44657162155929"])
+
+                  if(uploadImage.message == 'SUCCESS'){
+                    isValidSourceType = true
+                    param.content.image_url = uploadImage.data
+                    param.content.type = 'image'
                   }
-                }
-              } else {
-                errorMessage = "Cannot sent image to user due to technical issue"
-              }
+                }else{
+                  errorMessage = "Cannot sent image to user due to technical issue"
+                } */
             } else {
               isValidSourceType = true
               messageContent = {
                 image_url: inboundConversationContent.mediaUrl,
-                type: 'text'
+                type: 'image'
               }
             }
-            break;
-        case 'file':
-            let fileType = inboundConversationContent.mediaType
-            if (fileType.includes('video')) {
-              if(payload.conversation.metadata[zdFieldsDecrypted.marketplace_name] == 'shopee'){
-                  /* let formData = await downloadImageToBuffer(payload.message.content.mediaUrl, imageName, fileType, 0)
-
-                  if(formData){
-                    let uploadImage = await uploadImageToBantudagang(formData, payload.conversation.metadata["dataCapture.ticketField.44657162155929"])
-
-                    if(uploadImage.message == 'SUCCESS'){
-                      isValidSourceType = true
-                      param.content.image_url = uploadImage.data
-                      param.content.type = 'image'
-                    }
-                  }else{
-                    errorMessage = "Cannot sent image to user due to technical issue"
-                  } */
-              } else {
-                isValidSourceType = true
-                messageContent = {
-                  image_url: inboundConversationContent.mediaUrl,
-                  type: 'image'
-                }
-              }
-            }
-            break;
-        default:
-            break;
+          }
+          break;
+      default:
+          break;
     }
     bdMessagePayload['content'] = messageContent;
 
