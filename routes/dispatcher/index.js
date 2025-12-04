@@ -102,7 +102,7 @@ router.post('/zero', async function(req, res, next) {
                     res.status(200).send({ dispatch_zero: 'Message passed and message posted'});
                 }
             } else {
-                console.info('Other inbound conversation id ---- bypass to agent')
+                console.info(`${inboundConversationId} store:  ${conversationMetadata[zdFieldsDecrypted.store]}---- bypass to agent`)
                 await bypassToAgent(inboundConversationId, conversationMetadata);
                 res.status(200).send({ dispatch_zero: 'bypassed to agent'});
             }
