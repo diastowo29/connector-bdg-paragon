@@ -1,5 +1,6 @@
 var express = require('express');
-const axios = require('axios')
+const axios = require('axios');
+const { getDecryptedString } = require('../../config/encrypt/config');
 var router = express.Router();
 const zdFieldsEncrypted = process.env.ZD_TICKET_FIELDS;
 const zdFieldsDecrypted = JSON.parse(getDecryptedString(zdFieldsEncrypted));
