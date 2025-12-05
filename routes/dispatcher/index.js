@@ -12,8 +12,10 @@ const zdFieldsDecrypted = JSON.parse(getDecryptedString(zdFieldsEncrypted));
 const suncoConfigDecrypted = JSON.parse(getDecryptedString(suncoConfigEncrypted));
 
 router.get('/config', function(req, res, next) {
-    const fieldsList = JSON.parse(getDecryptedString(zdFieldsEncrypted));
-    res.status(200).send({ticket_fields: fieldsList, sunco: suncoConfigDecrypted})
+    res.status(200).send({
+        ticket_fields: zdFieldsDecrypted, 
+        sunco: suncoConfigDecrypted
+    })
 });
 
 router.post('/zero', async function(req, res, next) {

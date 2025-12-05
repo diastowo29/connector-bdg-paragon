@@ -1,0 +1,32 @@
+class Config {
+  constructor(){
+    this.url = ""
+    this.accessToken = ''
+    this.email = ""
+    this.password = ""
+    this.token = ""
+  }
+
+  get bdData(){
+    return {
+      url: this.url,
+      accessToken: this.accessToken,
+      email: this.email,
+      password: this.password,
+      token: this.token
+    }
+  }
+
+  set default(data){
+    this.url = data.url
+    this.email = data.email
+    this.password = data.password
+    this.token = data.token
+  }
+
+  set bdToken(newToken){
+    this.accessToken = newToken
+  }
+}
+
+module.exports = new Config()
