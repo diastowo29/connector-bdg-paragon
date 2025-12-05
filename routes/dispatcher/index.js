@@ -11,12 +11,12 @@ const ultimateWhitelistChannel = process.env.SUNCO_ULTIMATE_WHITELIST_ID;
 const zdFieldsDecrypted = JSON.parse(getDecryptedString(zdFieldsEncrypted));
 const suncoConfigDecrypted = JSON.parse(getDecryptedString(suncoConfigEncrypted));
 
-router.get('/config', function(req, res, next) {
+/* router.get('/config', function(req, res, next) {
     res.status(200).send({
         ticket_fields: zdFieldsDecrypted, 
         sunco: suncoConfigDecrypted
     })
-});
+}); */
 
 router.post('/zero', async function(req, res, next) {
     if (!req.body.events) {

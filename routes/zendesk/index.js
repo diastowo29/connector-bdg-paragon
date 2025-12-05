@@ -13,13 +13,13 @@ const zendesk = JSON.parse(getDecryptedString(zendeskEncrypted))
 const bantuDagangEncrypted = process.env.BANTUDAGANG
 bantuDagang.default = JSON.parse(getDecryptedString(bantuDagangEncrypted))
 
-router.get('/config', function(req, res) {
+/* router.get('/config', function(req, res) {
   res.status(200).send({
     sunco: suncoConfigVars,
     zendesk: zendesk,
     bantu_dagang: bantuDagang
   })
-})
+}) */
 
 let csatRespond = {}
 // getCsatRespond()
@@ -34,9 +34,9 @@ router.post('/agent_workspace/event', async function(req, res){
     console.log(baseLog, JSON.stringify(req.body));
     let sourceType = payload.message.source.type
     let messageAuthor = payload.message.author.type
-    let isCsatOffered = payload.conversation?.metadata?true:false
+    let isCsatOffered = payload.conversation?.metadata ? true : false
     const convMetadata = payload.conversation.metadata
-    isCsatOffered = isCsatOffered && convMetadata.hasOwnProperty('is_csat_offered')?convMetadata.is_csat_offered:false
+    isCsatOffered = isCsatOffered && convMetadata.hasOwnProperty('is_csat_offered') ? convMetadata.is_csat_offered : false
 
     if (messageAuthor == 'business') {
       // SEND MESSAGE TO BANTU DAGANG
@@ -278,12 +278,8 @@ function updateConversation(convId, convMetadata, flag){
     }
 
     conversationUpdateBody.metadata = newMetadata
-  }else{
+  } else {
     conversationUpdateBody.metadata = convMetadata
-    // conversationUpdateBody.metadata = {
-    //   zd_ticket_id: '',
-    //   is_csat_offered: false
-    // }
   }
 
   return conversationApi.updateConversation(suncoConfigVars.app_id, convId, conversationUpdateBody).then(function(data) {
@@ -328,74 +324,6 @@ function postMessage(message, conversationId, retryTime){
     }
   })
 }
-
-// async function downloadImageToBuffer(url, imageName, imageType, flag) {
-//   let baseLog = `downloadImageToBuffer(${url}, ${imageName}, ${imageType})`
-//   let token = btoa(`${suncoConfigVars.key_id}:${suncoConfigVars.secret}`)
-//   const response = await axios({
-//     url,
-//     method: 'GET',
-//     responseType: 'arraybuffer',
-//     headers:{
-//       'Authorization': `Basic ${token}`
-//     }
-//   })
-
-//   try {
-//     const imageBuffer = Buffer.from(response.data);
-//     const contentType = response.headers["content-type"] || imageType
-//     const imageBlob = new Blob([imageBuffer], { type: contentType })
-//     const formData = new FormData()
-
-//     if (flag == 0) {
-//       formData.append('file', imageBlob,  imageName)
-//       return formData
-//     } else {
-//       formData.append('source', imageBlob,  imageName)
-//       return imageBlob
-//     }
-//   } catch(error) {
-//     return null
-//   }
-// }
-
-// async function uploadImageToBantudagang(formData, storeCode){
-//   let baseLog = `uploadImageToBantudagang(${formData}, ${storeCode})`
-  // --- need more BD config
-  /* return axios.post( `${bantuDagang.bdData.url}/chat/upload/shopee?store_code=${storeCode}`, formData,{
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      'Authorization': `Bearer ${bantuDagang.bdData.accessToken}`
-    }
-  }).then(function(response){
-    console.log(baseLog, 'upload image to bantudagang success', JSON.stringify(response.data))
-    return response.data
-  }).catch(async function(error){
-    console.log(baseLog, 'upload image to bantudagang error')
-    if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-      console.log(baseLog, error.response.data);
-      console.log(baseLog, error.response.status);
-      console.log(baseLog, error.response.headers);
-
-      if(error.response.status == 401){
-        await getRefreshToken()
-        sendMessageToBantudagang(payload)
-      }
-    } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-      console.log(baseLog, error.request);
-    } else {
-        // Something happened in setting up the request that triggered an Error
-      console.log(baseLog, 'Error', error.message);
-    }
-    console.log(baseLog, error.config)
-    return {message: "FAILED"}
-  }) */
-// }
 
 function zdUpdateTicket(ticketId, csat){
   let baseLog = `[routes/bantudagang] zdUpdateTicket(${ticketId}) -`
@@ -568,7 +496,7 @@ async function sendMessageToBantudagang(payload){
 
     if(isValidSourceType){
       // post chat reply to bantudagang
-      console.log( baseLog, `${bantuDagang.bdData.url}/chat/reply`)
+      console.log(baseLog, `${bantuDagang.bdData.url}/chat/reply`)
       console.log(baseLog, 'data:', JSON.stringify(param))
 
       if(payload.message.source.type == 'api:conversations' && payload.conversation.activeSwitchboardIntegration.integrationType == 'zd:answerBot'){
