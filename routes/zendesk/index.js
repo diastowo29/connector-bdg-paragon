@@ -21,6 +21,14 @@ bantuDagang.default = JSON.parse(getDecryptedString(bantuDagangEncrypted))
   })
 }) */
 
+let productReview = {};
+getProductReview(`${zendesk.url}/api/v2/custom_objects/product_review/records`)
+
+router.post('/testing', function(req, res) {
+  console.log(JSON.stringify(req.body))
+  res.status(200).send({})
+})
+
 let csatRespond = {}
 // getCsatRespond()
 getRefreshToken()
@@ -110,6 +118,64 @@ router.post('/agent_workspace/event', async function(req, res){
   }catch(error){
     console.log(baseLog,'internal server error', error)
     res.status(500).send({message: "internal server error"})
+  }
+})
+
+router.post('/reply_rating', function(req,res){
+  let baseLog = '/bantudagang/dev/reply_rating POST -'
+  try{
+    console.log(baseLog, JSON.stringify(req.body))
+    let name = req.body.name
+    let rating = req.body.rating_review.split('_')[1]
+    const highRate = ((rating == '4') || (rating == '5')) ? true : false;
+    let fieldKey = `${req.body.store_type.toLowerCase()}_${rating}`
+    const agentComment = req.body.agent_comment || '';
+    const comment = (highRate) ? productReview[name][fieldKey] : agentComment
+
+    return axios({
+      url: `${bantuDagang.bdData.url}/product/rating`,
+      method: 'post',
+      data: {
+        rating_code: req.body.rating_code,
+        comment: comment
+      },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${bantuDagang.bdData.accessToken}`
+      }
+      }).then(function(){
+        console.log(baseLog, 'reply rating success')
+        res.send({
+          status: true,
+          message: 'Reply rating success'
+        })
+      }).catch(function(error){
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          console.log(baseLog, 'error response', error.response.data)
+        } else if (error.request) {
+          // The request was made but no response was received
+          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+          // http.ClientRequest in node.js
+          console.log(baseLog, 'error request', error.request)
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          console.log(baseLog,'Error', error.message);
+        }
+        console.log(baseLog, 'error config', error.config)
+        res.status(400).send({
+          status: false,
+          message: 'Reply rating failed'
+        })
+      }
+    )
+  }catch(error){
+    console.log(baseLog,'internal server error',error)
+    res.status(400).send({
+      status: false,
+      message: 'Server failed to execution. Make sure you send clean data'
+    })
   }
 })
 
@@ -242,19 +308,12 @@ function getCsatRespond(){
       return true
     }).catch(function(error){
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         console.log(baseLog, 'error response', error.response.data)
-
         getCsatRespond()
         return
       } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
         console.log(baseLog, 'error request', error.request)
       } else {
-        // Something happened in setting up the request that triggered an Error
         console.log(baseLog, 'Error', error.message);
       }
       console.log(baseLog, 'error config', error.config)
@@ -803,6 +862,52 @@ async function uploadImageToBantudagang(formData, storeCode){
     console.log(baseLog, 'error config', error.config)
     return {message: "FAILED"}
   })
+}
+
+async function getProductReview(url){
+  let baseLog = '[routes/bantudagang/dev] getProductReview() -'
+  console.log(baseLog, url)
+
+  return axios({
+    url: url,
+    method: 'get',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': zendesk.token
+    }
+    }).then(function(response){
+      // console.log(baseLog, 'get object (product_review) success', JSON.stringify(response.data))
+      response.data.custom_object_records.forEach(record => {
+        productReview[record.name] = record.custom_object_fields
+      })
+      
+      if(response.data.links.next){
+        getProductReview(response.data.links.next)
+      }else{
+        console.log(baseLog, 'productReview:', JSON.stringify(productReview))
+        return true
+      }
+    }).catch(function(error){
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.log(baseLog, 'error response', error.response.data)
+
+        getProductReview(url)
+        return
+      } else if (error.request) {
+        // The request was made but no response was received
+        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+        // http.ClientRequest in node.js
+        console.log(baseLog, 'error request', error.request)
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log(baseLog, 'Error', error.message);
+      }
+      console.log(baseLog, 'error config', error.config)
+      return false
+    }
+  )
 }
 
 module.exports = router;
