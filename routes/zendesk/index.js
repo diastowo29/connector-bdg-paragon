@@ -30,7 +30,7 @@ router.post('/testing', function(req, res) {
 })
 
 let csatRespond = {}
-// getCsatRespond()
+getCsatRespond()
 getRefreshToken()
 
 router.post('/agent_workspace/event', async function(req, res){
@@ -81,24 +81,10 @@ router.post('/agent_workspace/event', async function(req, res){
             // await updateConversation(payload.conversation.id, {csat_score: "csat_2"}, 1)
             // await postMessage(csatRespond[buyerRegion].respond_2, payload.conversation.id, 0)
             // await zdUpdateTicket(ticketId,'csat_2')
-            await updateConversation(payload.conversation.id, {csat_score: "csat_2"}, 1),
+            await updateConversation(payload.conversation.id, {csat_score: "csat_2", is_csat_offered: false}, 1),
             await Promise.all([
               postMessage(csatRespond[buyerRegion].respond_2, payload.conversation.id, 0),
               zdUpdateTicket(ticketId,'csat_2')
-            ])
-          }else{
-            res.send('ok')
-            return
-          }
-        } else if(currentCsat=='csat_2') {
-          if(messageText=='3' || messageText=='4' || messageText=='5'){
-            // await updateConversation(payload.conversation.id, {csat_score: `csat_${messageText}`, is_csat_offered: false}, 1)
-            // await postMessage(csatRespond[buyerRegion].respond_3, payload.conversation.id, 0)
-            // await zdUpdateTicket(ticketId,`csat_${messageText}`)
-            await updateConversation(payload.conversation.id, {csat_score: `csat_${messageText}`, is_csat_offered: false}, 1),
-            await Promise.all([
-              postMessage(csatRespond[buyerRegion].respond_3, payload.conversation.id, 0),
-              zdUpdateTicket(ticketId,`csat_${messageText}`)
             ])
           }else{
             res.send('ok')
@@ -179,6 +165,11 @@ router.post('/reply_rating', function(req,res){
   }
 })
 
+router.get('/sync_custom_object', function(req,res){
+  getCsatRespond()
+  getProductReview(`${zendesk.url}/api/v2/custom_objects/product_review/records`)
+  res.send('custom object will be sync..')
+})
 /* INACTIVE ENDPOINT ---- SOON MAYBE :) */
 router.post('/zd/reply', async function(req, res, next) {
     if (!req.body.events) {
