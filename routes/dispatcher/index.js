@@ -8,15 +8,21 @@ const suncoConfigEncrypted = process.env.SUNCO;
 const zdFieldsEncrypted = process.env.ZD_TICKET_FIELDS;
 const ultimateSwIntegrationId = process.env.SUNCO_ULTIMATE_SW_ID;
 const ultimateWhitelistChannel = process.env.SUNCO_ULTIMATE_WHITELIST_ID;
+const bypassAllConversation = process.env.BYPASS_CONVERSATION;
 const zdFieldsDecrypted = JSON.parse(getDecryptedString(zdFieldsEncrypted));
 const suncoConfigDecrypted = JSON.parse(getDecryptedString(suncoConfigEncrypted));
 
-/* router.get('/config', function(req, res, next) {
+router.get('/config', function(req, res, next) {
+    if (bypassAllConversation) {
+        console.log('Bypass all conversation is enabled');
+    } else {
+        console.log('Bypass all conversation is disabled');
+    }
     res.status(200).send({
         ticket_fields: zdFieldsDecrypted, 
         sunco: suncoConfigDecrypted
     })
-}); */
+});
 
 router.post('/zero', async function(req, res, next) {
     if (!req.body.events) {
@@ -63,32 +69,20 @@ router.post('/zero', async function(req, res, next) {
                     initiateTags = 'initiate_chat'
                 }
             }
-            // const conversationApi = new SunshineConversationsClient.ConversationsApi();
-            // let conversationBody = new SunshineConversationsClient.ConversationUpdateBody();
-            // conversationBody = {
-            //     metadata: {
-            //         // 'dataCapture.systemField.tags': affiliateTags,
-            //         [zdFieldsDecrypted.conversation_id]: inboundConversationId
-            //     }
-            // }
-            // await conversationApi.updateConversation(suncoAppId, inboundConversationId, conversationBody);
             conversationMetadata['dataCapture.systemField.tags'] = `${initiateTags}`;
             conversationMetadata[zdFieldsDecrypted.conversation_id] = inboundConversationId;
             conversationMetadata[zdFieldsDecrypted.affiliate] = affiliateTags;
             if (ultimateWhitelistChannel.includes(conversationMetadata[zdFieldsDecrypted.store])) {
                 if (isInitiate) {
-                    // console.info(conversationMetadata);
                     await bypassToAgent(inboundConversationId, conversationMetadata);
                     res.status(200).send({ dispatch_zero: 'Message passed and message posted'});
                 } else {
-                    // console.info(conversationMetadata);
                     const passControlApi = new SunshineConversationsClient.SwitchboardActionsApi();
                     let passControlBody = new SunshineConversationsClient.PassControlBody();
                     passControlBody = {
                         switchboardIntegration: ultimateSwIntegrationId,
                         metadata: conversationMetadata
                     }
-                    // console.info(passControlBody);
                     const postMessageApi = new SunshineConversationsClient.MessagesApi();
                     let postMessageBody = new SunshineConversationsClient.MessagePost();
                     postMessageBody = {
