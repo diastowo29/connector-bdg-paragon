@@ -13,14 +13,10 @@ const zdFieldsDecrypted = JSON.parse(getDecryptedString(zdFieldsEncrypted));
 const suncoConfigDecrypted = JSON.parse(getDecryptedString(suncoConfigEncrypted));
 
 router.get('/config', function(req, res, next) {
-    if (bypassAllConversation) {
-        console.log('Bypass all conversation is enabled');
-    } else {
-        console.log('Bypass all conversation is disabled');
-    }
     res.status(200).send({
-        ticket_fields: zdFieldsDecrypted, 
-        sunco: suncoConfigDecrypted
+        bypass: bypassAllConversation,
+        ticket_fields: zdFieldsEncrypted, 
+        sunco: suncoConfigEncrypted
     })
 });
 
@@ -72,7 +68,7 @@ router.post('/zero', async function(req, res, next) {
             conversationMetadata['dataCapture.systemField.tags'] = `${initiateTags}`;
             conversationMetadata[zdFieldsDecrypted.conversation_id] = inboundConversationId;
             conversationMetadata[zdFieldsDecrypted.affiliate] = affiliateTags;
-            if (ultimateWhitelistChannel.includes(conversationMetadata[zdFieldsDecrypted.store])) {
+            if (!bypassAllConversation) {
                 if (isInitiate) {
                     await bypassToAgent(inboundConversationId, conversationMetadata);
                     res.status(200).send({ dispatch_zero: 'Message passed and message posted'});
