@@ -8,7 +8,7 @@ const suncoConfigEncrypted = process.env.SUNCO;
 const zdFieldsEncrypted = process.env.ZD_TICKET_FIELDS;
 const ultimateSwIntegrationId = process.env.SUNCO_ULTIMATE_SW_ID;
 const ultimateWhitelistChannel = process.env.SUNCO_ULTIMATE_WHITELIST_ID;
-const bypassAllConversation = process.env.BYPASS_CONVERSATION;
+const bypassAllConversation = process.env.BYPASS_CONVERSATION === 'true' ? true : false;
 const zdFieldsDecrypted = JSON.parse(getDecryptedString(zdFieldsEncrypted));
 const suncoConfigDecrypted = JSON.parse(getDecryptedString(suncoConfigEncrypted));
 
