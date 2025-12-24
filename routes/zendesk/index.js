@@ -24,17 +24,12 @@ bantuDagang.default = JSON.parse(getDecryptedString(bantuDagangEncrypted))
 let productReview = {};
 getProductReview(`${zendesk.url}/api/v2/custom_objects/product_review/records`)
 
-router.post('/testing', function(req, res) {
-  console.log(JSON.stringify(req.body))
-  res.status(200).send({})
-})
-
 let csatRespond = {}
 // getCsatRespond()
 getRefreshToken()
 
 router.post('/agent_workspace/event', async function(req, res){
-  let baseLog = '/bantudagang/agent_workspace/event POST -'
+  let baseLog = '/zd/agent_workspace/event POST -'
   
   try{
     // let trigger = req.body.events[0].type
@@ -122,7 +117,7 @@ router.post('/agent_workspace/event', async function(req, res){
 })
 
 router.post('/reply_rating', function(req,res){
-  let baseLog = '/bantudagang/dev/reply_rating POST -'
+  let baseLog = '/zd/reply_rating POST -'
   try{
     console.log(baseLog, JSON.stringify(req.body))
     let name = req.body.name
@@ -289,7 +284,7 @@ router.post('/zd/reply', async function(req, res, next) {
 })
 
 function getCsatRespond(){
-  let baseLog = '[routes/bantudagang] getCsatRespond() -'
+  let baseLog = '[routes/zd] getCsatRespond() -'
   axios({
     url: `${zendesk.url}/api/v2/custom_objects/csat_respond/records`,
     method: 'get',
@@ -323,7 +318,7 @@ function getCsatRespond(){
 }
 
 function updateConversation(convId, convMetadata, flag){
-  let baseLog = `[routes/bantudagang] updateConversation(${convId}) -`
+  let baseLog = `[routes/zd] updateConversation(${convId}) -`
   // getApiInstance()
   let conversationApi = new SunshineConversationsClient.ConversationsApi()
   let conversationUpdateBody = new SunshineConversationsClient.ConversationUpdateBody()
@@ -353,7 +348,7 @@ function updateConversation(convId, convMetadata, flag){
 }
 
 function postMessage(message, conversationId, retryTime){
-  let baseLog = `[routes/bantudagang] postMessage(${conversationId}) -`
+  let baseLog = `[routes/zd] postMessage(${conversationId}) -`
   // getApiInstance()
   let messageApi = new SunshineConversationsClient.MessagesApi()
   let body = {
@@ -385,7 +380,7 @@ function postMessage(message, conversationId, retryTime){
 }
 
 function zdUpdateTicket(ticketId, csat){
-  let baseLog = `[routes/bantudagang] zdUpdateTicket(${ticketId}) -`
+  let baseLog = `[routes/zd] zdUpdateTicket(${ticketId}) -`
   let url = `${zendesk.url}/api/v2/tickets/${ticketId}`
   let csatFieldId = zdFieldsVars.csat_score
   let csatStatus = zdFieldsVars.custom_csat_status
@@ -433,7 +428,7 @@ function zdUpdateTicket(ticketId, csat){
 }
 
 async function sendMessageToBantudagang(payload){
-  let baseLog = `[routes/bantudagang] sendMessageToBantudagang(${payload.conversation.id}) -`
+  let baseLog = `[routes/zd] sendMessageToBantudagang(${payload.conversation.id}) -`
 //   console.log(JSON.stringify(payload))
   try{
     let isValidSourceType = false
@@ -737,7 +732,7 @@ async function sendMessageToBantudagang(payload){
 }
 
 function swPassControl(conversationId, convMetadata) {
-  let baseLog = `[routes/bantudagang] swPassControl(${conversationId}) -`
+  let baseLog = `[routes/zd] swPassControl(${conversationId}) -`
   try{
     convMetadata[zdFieldsVars.conversation_id] = conversationId
     // console.log(baseLog, 'conversation me' JSON.stringify(convMetadata))
@@ -769,7 +764,7 @@ function swPassControl(conversationId, convMetadata) {
 }
 
 function getRefreshToken() {
-  let baseLog = '[routes/bantudagang] getRefreshToken() -'
+  let baseLog = '[routes/zd] getRefreshToken() -'
   return axios({
     url: `${bantuDagang.bdData.url}/auth/login`,
     method: 'post',
@@ -806,7 +801,7 @@ function getRefreshToken() {
 }
 
 async function downloadImageToBuffer(url, imageName, imageType) {
-  let baseLog = `[routes/bantudagang] downloadImageToBuffer(${url}) -`
+  let baseLog = `[routes/zd] downloadImageToBuffer(${url}) -`
   let token = btoa(`${suncoConfigVars.key_id}:${suncoConfigVars.secret}`)
   const response = await axios({
       url,
@@ -831,7 +826,7 @@ async function downloadImageToBuffer(url, imageName, imageType) {
 }
 
 async function uploadImageToBantudagang(formData, storeCode){
-  let baseLog = `[routes/bantudagang] uploadImageToBantudagang(${storeCode}) -`
+  let baseLog = `[routes/zd] uploadImageToBantudagang(${storeCode}) -`
   return axios.post( `${bantuDagang.bdData.url}/chat/upload/shopee?store_code=${storeCode}`, formData,{
     headers: {
       'Content-Type': 'multipart/form-data',
@@ -865,7 +860,7 @@ async function uploadImageToBantudagang(formData, storeCode){
 }
 
 async function getProductReview(url){
-  let baseLog = '[routes/bantudagang/dev] getProductReview() -'
+  let baseLog = '[routes/zd] getProductReview() -'
   console.log(baseLog, url)
 
   return axios({

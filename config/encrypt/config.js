@@ -9,6 +9,7 @@ function getDecryptedString (str){
 }
 
 function doEncryptString (str) {
+  crypto.createCipheriv()
   const ciphertext = CryptoJS.AES.encrypt(str, keset).toString();
   return ciphertext;
 }
