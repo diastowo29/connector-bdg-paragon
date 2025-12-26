@@ -5,6 +5,7 @@ const { getDecryptedString } = require('../../config/encrypt/config');
 const bantuDagang = require('../../models/bantudagang-env');
 var router = express.Router();
 const zdFieldsEncrypted = process.env.ZD_TICKET_FIELDS;
+const bypassAllConversation = process.env.BYPASS_CONVERSATION === 'true' ? true : false;
 const zdFieldsVars = JSON.parse(getDecryptedString(zdFieldsEncrypted));
 const suncoConfigEncrypted = process.env.SUNCO;
 const suncoConfigVars = JSON.parse(getDecryptedString(suncoConfigEncrypted));
@@ -45,6 +46,16 @@ router.post('/agent_workspace/event', async function(req, res){
     let isCsatOffered = payload.conversation?.metadata ? true : false
     const convMetadata = payload.conversation.metadata
     isCsatOffered = isCsatOffered && convMetadata.hasOwnProperty('is_csat_offered') ? convMetadata.is_csat_offered : false
+    
+    /* if (messageAuthor == 'user' && sourceType == 'api:conversations') {
+      if (payload.conversation.activeSwitchboardIntegration.integrationType == 'ultimate') {
+        if (bypassAllConversation) {
+          let passControlMetadata = convMetadata || {};
+          await swPassControl(payload.conversation.id, passControlMetadata);
+          return res.send('ok');
+        }
+      }
+    } */
 
     if (messageAuthor == 'business') {
       // SEND MESSAGE TO BANTU DAGANG
