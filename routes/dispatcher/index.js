@@ -7,7 +7,7 @@ const logger = require('pino')()
 const suncoConfigEncrypted = process.env.SUNCO;
 const zdFieldsEncrypted = process.env.ZD_TICKET_FIELDS;
 const ultimateSwIntegrationId = process.env.SUNCO_ULTIMATE_SW_ID;
-const ultimateWhitelistChannel = process.env.SUNCO_ULTIMATE_WHITELIST_ID;
+const channelToBypass = process.env.SUNCO_ULTIMATE_WHITELIST_ID;
 const bypassAllConversation = process.env.BYPASS_CONVERSATION === 'true' ? true : false;
 const zdFieldsDecrypted = JSON.parse(getDecryptedString(zdFieldsEncrypted));
 const suncoConfigDecrypted = JSON.parse(getDecryptedString(suncoConfigEncrypted));
@@ -68,7 +68,14 @@ router.post('/zero', async function(req, res, next) {
             conversationMetadata['dataCapture.systemField.tags'] = `${initiateTags}`;
             conversationMetadata[zdFieldsDecrypted.conversation_id] = inboundConversationId;
             conversationMetadata[zdFieldsDecrypted.affiliate] = affiliateTags;
-            if (!bypassAllConversation) {
+            let bypass = false;
+            if (bypassAllConversation) {
+                bypass = true;
+            }
+            if (channelToBypass.includes(conversationMetadata[zdFieldsDecrypted.store])) {
+                bypass = true;
+            }
+            if (!bypass) {
                 if (isInitiate) {
                     await bypassToAgent(inboundConversationId, conversationMetadata);
                     res.status(200).send({ dispatch_zero: 'Message passed and message posted'});
