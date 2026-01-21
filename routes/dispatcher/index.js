@@ -20,6 +20,20 @@ router.get('/config', function(req, res, next) {
     })
 });
 
+router.post('/id', async function(req, res, next) {
+    res.status(200).send({product_id: req.body.data.product_id})
+})
+
+router.post('/pass', async function(req, res, next) {
+    const type = req.body.events[0].type;
+    const time = req.body.events[0].createdAt;
+    const activeSw = req.body.events[0].payload.conversation.activeSwitchboardIntegration.name;
+    console.log(`type: ${type} | time: ${time} | activeSw: ${activeSw}`);
+    console.log(new Date().toISOString());
+    console.log(JSON.stringify(req.body));
+    res.status(200).send({})
+})
+
 router.post('/zero', async function(req, res, next) {
     if (!req.body.events) {
         console.warn(req.body);
@@ -52,13 +66,13 @@ router.post('/zero', async function(req, res, next) {
         }
         logs['action'] = 'pass';
         logger.info(logs);
-        let affiliateTags = 'non_affiliate';
+        // let affiliateTags = 'non_affiliate';
         let initiateTags = 'non_initiate';
         let isInitiate = false;
         if (conversationMetadata) {
-            if (conversationMetadata[zdFieldsDecrypted.affiliate] == 1) {
-                affiliateTags = 'affiliate'
-            }
+            // if (conversationMetadata[zdFieldsDecrypted.affiliate] == 1) {
+            //     affiliateTags = 'affiliate'
+            // }
             if (messagePayload.metadata) {
                 if (messagePayload.metadata.agent_id) {
                     isInitiate = true;
@@ -67,7 +81,7 @@ router.post('/zero', async function(req, res, next) {
             }
             conversationMetadata['dataCapture.systemField.tags'] = `${initiateTags}`;
             conversationMetadata[zdFieldsDecrypted.conversation_id] = inboundConversationId;
-            conversationMetadata[zdFieldsDecrypted.affiliate] = affiliateTags;
+            // conversationMetadata[zdFieldsDecrypted.affiliate] = affiliateTags;
             let bypass = false;
             if (bypassAllConversation) {
                 bypass = true;
@@ -144,15 +158,14 @@ router.post('/one', async function(req, res, next) {
     logs['conversation_id'] = inboundConversationId;
     try {
         if (convPayload.activeSwitchboardIntegration.name == 'Dispatcher-One') {
-            let affiliateTags = '';
+            // let affiliateTags = '';
             if (conversationMetadata) {
                 logs['action'] = 'pass';
                 logger.info(logs);
-                if (conversationMetadata[zdFieldsDecrypted.affiliate] == 1) {
-                    affiliateTags = 'affiliate'
-                }
+                // if (conversationMetadata[zdFieldsDecrypted.affiliate] == 1) {
+                //     affiliateTags = 'affiliate'
+                // }
                 conversationMetadata[zdFieldsDecrypted.conversation_id] = inboundConversationId;
-                conversationMetadata[zdFieldsDecrypted.affiliate] = affiliateTags;
                 // conversationMetadata[zdFieldsDecrypted.affiliate] = affiliateTags;
                 const passControlApi = new SunshineConversationsClient.SwitchboardActionsApi();
                 let passControlBody = new SunshineConversationsClient.PassControlBody();
