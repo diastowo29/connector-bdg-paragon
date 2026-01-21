@@ -66,22 +66,22 @@ router.post('/zero', async function(req, res, next) {
         }
         logs['action'] = 'pass';
         logger.info(logs);
-        // let affiliateTags = 'non_affiliate';
+        let affiliateTags = 'non_affiliate';
         let initiateTags = 'non_initiate';
         let isInitiate = false;
         if (conversationMetadata) {
-            // if (conversationMetadata[zdFieldsDecrypted.affiliate] == 1) {
-            //     affiliateTags = 'affiliate'
-            // }
+            if (conversationMetadata[zdFieldsDecrypted.affiliate] == 1) {
+                affiliateTags = 'affiliate'
+            }
             if (messagePayload.metadata) {
                 if (messagePayload.metadata.agent_id) {
                     isInitiate = true;
                     initiateTags = 'initiate_chat'
                 }
             }
-            conversationMetadata['dataCapture.systemField.tags'] = `${initiateTags}`;
+            conversationMetadata['dataCapture.systemField.tags'] = `${initiateTags} ${affiliateTags}`;
             conversationMetadata[zdFieldsDecrypted.conversation_id] = inboundConversationId;
-            // conversationMetadata[zdFieldsDecrypted.affiliate] = affiliateTags;
+            conversationMetadata[zdFieldsDecrypted.affiliate] = affiliateTags;
             let bypass = false;
             if (bypassAllConversation) {
                 bypass = true;
@@ -158,14 +158,15 @@ router.post('/one', async function(req, res, next) {
     logs['conversation_id'] = inboundConversationId;
     try {
         if (convPayload.activeSwitchboardIntegration.name == 'Dispatcher-One') {
-            // let affiliateTags = '';
+            let affiliateTags = '';
             if (conversationMetadata) {
                 logs['action'] = 'pass';
                 logger.info(logs);
-                // if (conversationMetadata[zdFieldsDecrypted.affiliate] == 1) {
-                //     affiliateTags = 'affiliate'
-                // }
+                if (conversationMetadata[zdFieldsDecrypted.affiliate] == 1) {
+                    affiliateTags = 'affiliate'
+                }
                 conversationMetadata[zdFieldsDecrypted.conversation_id] = inboundConversationId;
+                conversationMetadata['dataCapture.systemField.tags'] = `${affiliateTags}`;
                 // conversationMetadata[zdFieldsDecrypted.affiliate] = affiliateTags;
                 const passControlApi = new SunshineConversationsClient.SwitchboardActionsApi();
                 let passControlBody = new SunshineConversationsClient.PassControlBody();
